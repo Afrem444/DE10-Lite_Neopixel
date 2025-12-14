@@ -4,16 +4,16 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity Praktikum_7 is
+entity DE10Lite_Neopixel is
 	port (
 		CLOCK_50 : in  std_logic;
 		GPIO     : out std_logic_vector(35 downto 0);
 		KEY      : in  std_logic_vector(1 downto 0);
 		SW       : in  std_logic_vector(9 downto 0)
 	); 
-end Praktikum_7;
+end DE10Lite_Neopixel;
 
-architecture rtl of Praktikum_7  is
+architecture rtl of DE10Lite_Neopixel  is
 	signal counter   : std_logic_vector (25 downto 0):= (others => '0');    -- 26Bit Vektor als Zähler! (2^26=67'108'864)
 	signal Clock_neo : std_logic := '0';
 	signal T0H : integer := 5;
