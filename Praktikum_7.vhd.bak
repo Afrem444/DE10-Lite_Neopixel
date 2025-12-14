@@ -1,0 +1,77 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity Praktikum_7 is
+	port (
+		KEY      : in  std_logic_vector(1 downto 0);
+		SW       : in  std_logic_vector(9 downto 0);
+		CLOCK_50 : in  std_logic;
+		LEDR     : out std_logic_vector(9 downto 0);
+		HEX0     : out std_logic_vector(7 downto 0) := "11111111";
+		HEX1     : out std_logic_vector(7 downto 0) := "11111111";
+		HEX2     : out std_logic_vector(7 downto 0) := "11111111"
+	); 
+end Praktikum_7;
+
+architecture rtl of Praktikum_7  is
+	
+	signal Q1 : std_logic := '0';
+	signal nQ1 : std_logic;
+	
+	signal Q2 : std_logic := '0';
+	
+	signal Q3 : std_logic := '0';
+	
+	signal counter   : std_logic_vector (25 downto 0):= (others => '0');    -- 26Bit Vektor als Zähler! (2^26=67'108'864)
+	signal Clock_1Hz : std_logic := '0';
+
+	begin
+		
+		nQ1 <= NOT KEY(0) NOR Q1;
+		Q1 <= NOT KEY(1) NOR nQ1;
+		HEX0(0) <= Q1;
+		HEX0(1) <= nQ1;
+		
+		SR_FF : process (KEY(0), KEY(1))
+		begin
+			if (NOT KEY(0) = '1') and (not KEY(1) = '0') then
+				Q2 <= '1';
+			elsif (NOT KEY(0) = '0') and (not KEY(1) = '1') then
+				Q2 <= '0';
+			end if;
+		end process;
+		
+		HEX1(0) <= not Q2;
+		HEX1(1) <= Q2;
+		
+		DIV_COUNTER : process (CLOCK_50, counter)		   -- Prozess für Clockteiler
+		begin
+			if (CLOCK_50'event AND CLOCK_50='1')then 		-- Positive Flanke erkennen
+				if (counter = 25000000) then   		  -- 1Hz Takt bei 50 MHz Clock
+					Clock_1Hz <= NOT Clock_1Hz;		    -- Teiler 
+					counter <= (others => '0');
+				else
+					counter <= counter + 1;				
+				end if; 	 
+			end if;
+		end process;
+		
+		HEX2(7) <= Clock_1Hz;
+		
+		T_SR_FF : process (Clock_1HZ, KEY(0), KEY(1))
+		begin
+			if (NOT KEY(0) = '1') and (not KEY(1) = '0') and (Clock_1HZ = '1') then
+				Q3 <= '1';
+			elsif (NOT KEY(0) = '0') and (not KEY(1) = '1') and (Clock_1HZ = '1') then
+				Q3 <= '0';
+			elsif (not KEY(0) = '1') and (not KEY(1) = '1') and (Clock_1HZ = '1') then
+				Q3 <= not Q3;
+			end if;
+		end process;
+		
+		HEX2(0) <= not Q3;
+		HEX2(1) <= Q3;
+		
+end rtl;
